@@ -41,6 +41,10 @@ namespace mamba
                     const std::string& version,
                     const std::string build_string,
                     std::size_t build_number);
+        PackageInfo(const std::string& name,
+                    const std::string& version,
+                    const std::string& build_string,
+                    const std::string& channel);
 
         PackageInfo(PackageInfo const&) = default;
         PackageInfo(PackageInfo&&) noexcept = default;

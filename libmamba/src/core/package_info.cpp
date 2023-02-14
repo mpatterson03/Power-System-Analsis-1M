@@ -279,6 +279,17 @@ namespace mamba
     {
     }
 
+    PackageInfo::PackageInfo(const std::string& n,
+                             const std::string& v,
+                             const std::string& b,
+                             const std::string& c)
+        : name(n)
+        , version(v)
+        , build_string(b)
+        , channel(c)
+    {
+    }
+
     bool PackageInfo::operator==(PackageInfo const& other) const
     {
         auto attrs = [](PackageInfo const& p)

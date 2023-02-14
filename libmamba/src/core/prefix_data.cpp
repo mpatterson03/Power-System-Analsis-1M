@@ -16,6 +16,8 @@ extern "C"
 #include "mamba/core/queue.hpp"
 #include "mamba/core/repo.hpp"
 
+#include <reproc++/run.hpp>
+
 namespace mamba
 {
     auto PrefixData::create(const fs::u8path& prefix_path) -> expected_t<PrefixData>
@@ -57,6 +59,7 @@ namespace mamba
                 }
             }
         }
+        load_site_packages();
     }
 
     void PrefixData::add_packages(const std::vector<PackageInfo>& packages)
@@ -144,4 +147,45 @@ namespace mamba
         auto prec = PackageInfo(std::move(j));
         m_package_records.insert({ prec.name, std::move(prec) });
     }
+
+    // Load python packages installed with pip in the site-packages of the prefix.
+    void PrefixData::load_site_packages()
+    {
+        LOG_INFO << "Loading site packages";
+
+        // Look for "python" package and return if doesn't exist
+        auto python_pkg_record = m_package_records.find("python");
+        if (python_pkg_record == m_package_records.end())
+        {
+            return;
+        }
+
+        // Run `pip freeze`
+        std::string out, err;
+        std::vector<std::string> args = { "pip", "freeze", "-l" };
+        auto [status, ec] = reproc::run(
+            args, reproc::options{}, reproc::sink::string(out), reproc::sink::string(err));
+        if (ec)
+        {
+            throw std::runtime_error(ec.message());
+        }
+
+        // Nothing installed with `pip`
+        if (out.empty())
+        {
+            return;
+        }
+
+        auto pkgs_info_list = split(strip(out), "\n");
+        for (auto& pkg_info_line : pkgs_info_list)
+        {
+            if (pkg_info_line.find("==") != std::string::npos)
+            {
+                auto pkg_info = split(strip(pkg_info_line), "==");
+                auto prec = PackageInfo(pkg_info[0], pkg_info[1], "pypi_0", "pypi");
+                m_package_records.insert({ prec.name, std::move(prec) });
+            }
+        }
+    }
+
 }  // namespace mamba
