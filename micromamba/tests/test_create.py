@@ -171,6 +171,7 @@ def test_env_logging_overhead_regression(tmp_home, tmp_root_prefix, tmp_path):
 @pytest.mark.parametrize("yaml_name", (False, True, "prefix"))
 @pytest.mark.parametrize("env_var", (False, True))
 @pytest.mark.parametrize("current_target_prefix_fallback", (False, True))
+@pytest.mark.parametrize("current_default_prefix_fallback", (False, True))
 @pytest.mark.parametrize(
     "similar_non_canonical,non_canonical_position",
     ((False, None), (True, "append"), (True, "prepend")),
@@ -186,6 +187,7 @@ def test_target_prefix(
     yaml_name,
     env_var,
     current_target_prefix_fallback,
+    current_default_prefix_fallback,
     similar_non_canonical,
     non_canonical_position,
 ):
@@ -249,6 +251,11 @@ def test_target_prefix(
         os.environ.pop("CONDA_PREFIX", None)
     else:
         os.environ["CONDA_PREFIX"] = str(p)
+
+    if not current_default_prefix_fallback:
+        os.environ.pop("CONDA_DEFAULT_ENV", None)
+    else:
+        os.environ["CONDA_DEFAULT_ENV"] = str(p)
 
     if (
         (cli_prefix and cli_env_name)
