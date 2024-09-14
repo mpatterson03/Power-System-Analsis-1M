@@ -171,7 +171,6 @@ def test_env_logging_overhead_regression(tmp_home, tmp_root_prefix, tmp_path):
 @pytest.mark.parametrize("yaml_name", (False, True, "prefix"))
 @pytest.mark.parametrize("env_var", (False, True))
 @pytest.mark.parametrize("current_target_prefix_fallback", (False, True))
-@pytest.mark.parametrize("current_default_prefix_fallback", (False, True))
 @pytest.mark.parametrize(
     "similar_non_canonical,non_canonical_position",
     ((False, None), (True, "append"), (True, "prepend")),
@@ -187,7 +186,6 @@ def test_target_prefix(
     yaml_name,
     env_var,
     current_target_prefix_fallback,
-    current_default_prefix_fallback,
     similar_non_canonical,
     non_canonical_position,
 ):
@@ -249,24 +247,20 @@ def test_target_prefix(
 
     if not current_target_prefix_fallback:
         os.environ.pop("CONDA_PREFIX", None)
+        os.environ.pop("CONDA_DEFAULT_ENV", None)
     else:
         os.environ["CONDA_PREFIX"] = str(p)
 
-    if not current_default_prefix_fallback:
-        os.environ.pop("CONDA_DEFAULT_ENV", None)
-    else:
-        os.environ["CONDA_DEFAULT_ENV"] = str(p)
-
     if (
         (cli_prefix and cli_env_name)
-    #    or (yaml_name == "prefix")
+         or (yaml_name == "prefix")
          or not (cli_prefix or cli_env_name or yaml_name or env_var)
     ):
         with pytest.raises(subprocess.CalledProcessError):
             helpers.create(*cmd, "--print-config-only")
-    #else:
-    #    res = helpers.create(*cmd, "--print-config-only")
-    #    check_create_result(res, root_prefix=root_prefix, target_prefix=expected_p)
+    else:
+        res = helpers.create(*cmd, "--print-config-only")
+        check_create_result(res, root_prefix=root_prefix, target_prefix=expected_p)
 
 
 @pytest.mark.parametrize("shared_pkgs_dirs", [True], indirect=True)

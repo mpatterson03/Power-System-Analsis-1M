@@ -180,6 +180,7 @@ class TestInstall:
 
         if not current_target_prefix_fallback:
             os.environ.pop("CONDA_PREFIX")
+            os.environ.pop("CONDA_DEFAULT_ENV")
         else:
             os.environ["CONDA_PREFIX"] = p
 
