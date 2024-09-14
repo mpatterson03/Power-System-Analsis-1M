@@ -594,8 +594,15 @@ namespace mamba
                     prefix = util::get_env("CONDA_PREFIX").value_or("");
                 }
 
+                bool use_default_prefix_fallback = config.at("use_default_prefix_fallback")
+                                                       .value<bool>();
+                if (prefix.empty() && use_default_prefix_fallback)
+                {
+                    prefix = util::get_env("CONDA_DEFAULT_ENV").value_or("");
+                }
+
                 bool use_root_prefix_fallback = config.at("use_root_prefix_fallback").value<bool>();
-                if (use_root_prefix_fallback && prefix.empty())
+                if (prefix.empty() && use_root_prefix_fallback)
                 {
                     prefix = root_prefix;
                 }
@@ -1201,6 +1208,7 @@ namespace mamba
                             "env_name",
                             "spec_file_env_name",
                             "use_target_prefix_fallback",
+                            "use_default_prefix_fallback",
                             "use_root_prefix_fallback" })
                    .set_single_op_lifetime()
                    .description("Path to the target prefix")
@@ -1226,6 +1234,13 @@ namespace mamba
                    .group("Basic")
                    .set_single_op_lifetime()
                    .description("Fallback to the root prefix or not"));
+
+        insert(Configurable("use_default_prefix_fallback", true)
+                   .group("Basic")
+                   .set_single_op_lifetime()
+                   .description(
+                       "Fallback to the prefix specified with environment variable CONDA_DEFAULT_ENV or not"
+                   ));
 
         insert(Configurable("target_prefix_checks", MAMBA_NO_PREFIX_CHECK)
                    .group("Basic")
