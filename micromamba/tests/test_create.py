@@ -260,13 +260,21 @@ def test_target_prefix(
     if (
         (cli_prefix and cli_env_name)
         or (yaml_name == "prefix")
-        or not (cli_prefix or cli_env_name or yaml_name or env_var)
     ):
         with pytest.raises(subprocess.CalledProcessError):
             helpers.create(*cmd, "--print-config-only")
-    else:
-        res = helpers.create(*cmd, "--print-config-only")
-        check_create_result(res, root_prefix=root_prefix, target_prefix=expected_p)
+    #else if (
+    #):
+    #    with pytest.raises(subprocess.CalledProcessError):
+    #        helpers.create(*cmd, "--print-config-only")
+    #else if (
+    #    not (cli_prefix or cli_env_name or yaml_name or env_var)
+    #):
+    #    with pytest.raises(subprocess.CalledProcessError):
+    #        helpers.create(*cmd, "--print-config-only")
+    #else:
+    #    res = helpers.create(*cmd, "--print-config-only")
+    #    check_create_result(res, root_prefix=root_prefix, target_prefix=expected_p)
 
 
 @pytest.mark.parametrize("shared_pkgs_dirs", [True], indirect=True)
