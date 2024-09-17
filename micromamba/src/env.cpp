@@ -235,9 +235,6 @@ set_env_command(CLI::App* com, Configuration& config)
     remove_subcom->callback(
         [&config]
         {
-            // Remove specs if exist
-            remove(config, MAMBA_REMOVE_ALL);
-
             const auto& ctx = config.context();
             if (!ctx.dry_run)
             {
@@ -248,6 +245,9 @@ set_env_command(CLI::App* com, Configuration& config)
                 EnvironmentsManager env_manager{ ctx };
                 // Unregister environment
                 env_manager.unregister_env(util::expand_home(prefix.string()));
+
+                // Remove specs if exist
+                remove(config, MAMBA_REMOVE_ALL);
 
                 Console::instance().print(util::join(
                     "",
